@@ -31,6 +31,7 @@ Top-level record (Envelope):
 * * op: A string representing the operation type (e.g., insert, update, delete).
 * * ts_ms: A timestamp representing when the operation occurred.
 * * transaction: This can be null or a nested record (block) with fields id, total_order, and data_collection_order.</br>
+
 Nested record (Value):
 
 name: Value
