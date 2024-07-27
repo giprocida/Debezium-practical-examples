@@ -75,8 +75,8 @@ The Avro Converter handles this unpacking, transforming the Avro binary format b
 * Schema Management: The Avro Converter works with a schema registry, which is a central place where all these blueprints (schemas) are stored. This registry helps keep track of all the different versions of the data structure, ensuring that both the sender and receiver understand the data in the same way.
 
 **Avro Serializer**
-Helps Kafka producers and consumers work with data in Avro format.
 
+Helps Kafka producers and consumers work with data in Avro format.
 
 
 * Serialization: When a Kafka producer wants to send data, it needs to pack this data efficiently.
