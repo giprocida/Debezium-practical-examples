@@ -47,9 +47,9 @@ Breakdown of the schema:
 * name: "User" is the name of the record.
 * namespace: "com.example" specifies the namespace, which helps to avoid name conflicts.
 * fields: An array that defines the fields within the record.
-* * id: An integer field representing the user's ID.
-* * name: A string field representing the user's name.
-* * email: A string field representing the user's email address.
+  * id: An integer field representing the user's ID.
+  * name: A string field representing the user's name.
+  * email: A string field representing the user's email address.
 
 
 ```
