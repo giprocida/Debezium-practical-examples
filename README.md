@@ -10,8 +10,13 @@ deploys the topology of services as defined in the
 
 ### Core Concepts ###
 
-Before explaining how avro can be configured, let's clarify some important terminology and concepts. What is an Avro Schema? 
-For example, take a look at the `cdc-schema.json`. It's the `Change Event Value Schema` for the `customers` table.
+
+Before explaining how avro can be configured, let's clarify some important terminology and concepts.
+**What is an Avro Schema?** 
+An Avro schema defines the structure of your data in a compact and efficient binary format. It serves as a blueprint for how data is serialized and deserialized, ensuring consistency and compatibility across different systems.
+To illustrate, consider the `cdc-schema.json` file, which defines the `Change Event Value Schema` for the customers table. 
+
+For example, take a look at the `cdc-schema.json` file. It's the `Change Event Value Schema` for the `customers` table.
 The provided schema represents a nested Avro schema. Here's a breakdown of its structure:
 
 Top-level record (Envelope):
