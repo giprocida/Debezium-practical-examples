@@ -38,10 +38,10 @@ Nested record (Value):
 * type: "record"
 * name: "Value"
 * fields:
-* * id: An integer representing the ID of the customer.
-* * first_name: A string representing the first name of the customer.
-* * last_name: A string representing the last name of the customer.
-* * email: A string representing the email of the customer.
+  * id: An integer representing the ID of the customer.
+  * first_name: A string representing the first name of the customer.
+  * last_name: A string representing the last name of the customer.
+  * email: A string representing the email of the customer.
 
 This is what an Avro schema looks like with a much simpler example:
 
