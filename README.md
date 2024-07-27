@@ -16,10 +16,9 @@ Before explaining how avro can be configured, let's clarify some important termi
 
 
 An Avro schema defines the structure of your data in a compact and efficient binary format. It serves as a blueprint for how data is serialized and deserialized, ensuring consistency and compatibility across different systems.
-To illustrate, consider the `cdc-schema.json` file, which defines the `Change Event Value Schema` for the customers table. 
+To illustrate, consider the `cdc-schema.json` file, which defines the `Change Event Value Schema` for the customers table. The provided schema represents a nested Avro schema. 
 
-
-The provided schema represents a nested Avro schema. Here's a breakdown of its structure:
+Here's a breakdown of its structure:
 
 Top-level record (Envelope):
 
@@ -31,7 +30,7 @@ Top-level record (Envelope):
 * * source: It contains metadata about the source of the data change, with fields like version, connector, name, ts_ms, snapshot, db, sequence, table, server_id, gtid, file, pos, row, thread, and query.
 * * op: A string representing the operation type (e.g., insert, update, delete).
 * * ts_ms: A timestamp representing when the operation occurred.
-* * transaction: This can be null or a nested record (block) with fields id, total_order, and data_collection_order.
+* * transaction: This can be null or a nested record (block) with fields id, total_order, and data_collection_order.</br>
 Nested record (Value):
 
 name: Value
