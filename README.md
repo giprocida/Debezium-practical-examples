@@ -54,6 +54,7 @@ Breakdown of the schema:
 
 ```
 
+A record adhering to this schema might look like this in JSON format
 {
   "id": 1,
   "name": "Alice",
@@ -61,7 +62,25 @@ Breakdown of the schema:
 }
 ```
 
+Before we move forward, let's clarify some important terminology and concepts:
 
+**Avro Converter**
+**Role**: Converts data between Kafka Connect's internal format and Avro format.
+
+**Functions**:
+
+Serialization: Transforms native data (e.g., JSON) into Avro binary format.
+Deserialization: Transforms Avro binary data back into its native format.
+Schema Management: Manages schema registration and retrieval using a schema registry.
+
+**Avro Serializer**
+**Role**: Handles Avro data serialization and deserialization in Kafka producers and consumers.
+
+**Functions**:
+
+Serialization: Converts native data (e.g., Java objects) into Avro binary format.
+Deserialization: Converts Avro binary data back into its native format.
+Schema Integration: Ensures data conforms to the schema and interacts with the schema registry.
 
 
 #### Minikube ####
