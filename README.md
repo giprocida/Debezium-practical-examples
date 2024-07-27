@@ -1,11 +1,6 @@
 ## Debezium Tutorial ##
 
-
-
-This project demonstrates how to easily deploy `Debezium` on Kubernetes using Minikube. Additionally, to provide a practical understanding of Kubernetes resources like ServiceAccount, Role, and RoleBinding, this project explains their purposes and showcases their functionality.
-
-The deployment, which utilizes the permissions defined in the `Role` object, prints all the containers for each pod and all the secrets from the `debezium-example` namespace where Debezium resides.
-Before we start, let's first highlight some key differences between Kubernetes running on Docker Desktop and Kubernetes running on Minikube.
+deploys the topology of services as defined in the
 
 ## Prerequisites ##
 
@@ -13,10 +8,45 @@ Before we start, let's first highlight some key differences between Kubernetes r
 * Docker Desktop installed 
 
 
-### Overview: How Minikube and Kubernetes on Docker Desktop Work ###
+### Core Concepts ###
 
-To use Avro-style messages instead of JSON, Avro can be configured one of two ways, in the Kafka Connect worker configuration or in the connector configuration. Using Avro in conjunction with the schema registry allows for much more compact messages. [Avro documentation](https://avro.apache.org/docs/1.11.1/specification/_print/#preamble). For example:
-Change Event Value Schema for the customers table (see the file called). It a nested avro schema blah blah blah. Let s keep things simple. This is what a avro schema looks like:
+Before explaining how avro can be configured, let's clarify some important terminology and concepts. What is an Avro Schema? 
+For example, take a look at the `cdc-schema.json`. It's the `Change Event Value Schema` for the `customers` table.
+The provided schema represents a nested Avro schema. Here's a breakdown of its structure:
+
+Top-level record (Envelope):
+
+* name: Envelope
+* namespace: dbserver1.inventory.customers
+* fields:
+* * before: It represents state of the record before an update.
+* * after: It represents the state of the record after an update.
+* * source: It contains metadata about the source of the data change, with fields like version, connector, name, ts_ms, snapshot, db, sequence, table, server_id, gtid, file, pos, row, thread, and query.
+* * op: A string representing the operation type (e.g., insert, update, delete).
+* * ts_ms: A timestamp representing when the operation occurred.
+* * transaction: This can be null or a nested record (block) with fields id, total_order, and data_collection_order.
+Nested record (Value):
+
+name: Value
+fields:
+id: An integer representing the ID of the customer.
+first_name: A string representing the first name of the customer.
+last_name: A string representing the last name of the customer.
+email: A string representing the email of the customer.
+Source record:
+
+name: Source
+namespace: io.debezium.connector.mysql
+fields: Various metadata fields as mentioned above.
+Transaction record (block):
+
+name: block
+namespace: event
+fields: id, total_order, and data_collection_order.
+This schema is typical for capturing change data capture (CDC) events, where each event captures the state before and after the change, along with metadata about the source and the nature of the change.
+
+
+It a nested avro schema. Let s keep things simple. This is what a avro schema looks like:
 
 
 ```
@@ -62,7 +92,8 @@ A record adhering to this schema might look like this in JSON format
 }
 ```
 
-Before we move forward, let's clarify some important terminology and concepts:
+Take a look at[Avro documentation](https://avro.apache.org/docs/1.11.1/specification/_print/#preamble).
+
 
 **Avro Converter**
 
@@ -99,6 +130,10 @@ Imagine you have a message that you want to send to someone, but you want to mak
 You can add new fields or change things around, and it ensures old data can still be read.
 
 
+
+### Using the Avro message format ####
+
+Avro message format can be configured one of two ways, in the Kafka Connect worker configuration or in the connector configuration. Using Avro in conjunction with the schema registry allows for much more compact messages. 
 
 #### Minikube ####
 Minikube is designed to run a local Kubernetes cluster on your machine for development and testing. It creates a VM (or uses a container) to run the Kubernetes cluster, and this VM/container runs its own Docker daemon, isolated from your host machine’s Docker daemon. You start Minikube using a command, choosing a VM driver (like VirtualBox) or a container driver (like Docker). For example, you might use minikube start.
