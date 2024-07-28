@@ -12,6 +12,7 @@ deploys the topology of services as defined in the
 
 
 Before explaining how avro can be configured, let's clarify some important terminology and concepts.</br>
+
 **What is an Avro Schema?** 
 
 
@@ -26,12 +27,12 @@ Top-level record (Envelope):
 * name: "Envelope" is the name of the record
 * namespace: dbserver1.inventory.customers
 * fields:
-* * before: It represents state of the record before an update.
-* * after: It represents the state of the record after an update.
-* * source: It contains metadata about the source of the data change, with fields like version, connector, name, ts_ms, snapshot, db, sequence, table, server_id, gtid, file, pos, row, thread, and query.
-* * op: A string representing the operation type (e.g., insert, update, delete).
-* * ts_ms: A timestamp representing when the operation occurred.
-* * transaction: This can be null or a nested record (block) with fields id, total_order, and data_collection_order.</br>
+  * before: It represents state of the record before an update.
+  * after: It represents the state of the record after an update.
+  * source: It contains metadata about the source of the data change, with fields like version, connector, name, ts_ms, snapshot, db, sequence, table, server_id, gtid, file, pos, row, thread, and query.
+  * op: A string representing the operation type (e.g., insert, update, delete).
+  * ts_ms: A timestamp representing when the operation occurred.
+  * transaction: This can be null or a nested record (block) with fields id, total_order, and data_collection_order.</br>
 
 Nested record (Value):
 
@@ -78,10 +79,9 @@ Breakdown of the schema:
   * name: A string field representing the user's name.
   * email: A string field representing the user's email address.
 
+A record adhering to this schema might look like this in JSON format:
 
 ```
-
-A record adhering to this schema might look like this in JSON format
 {
   "id": 1,
   "name": "Alice",
