@@ -89,7 +89,7 @@ A record adhering to this schema might look like this in JSON format:
 }
 ```
 
-Take a look at [Avro documentation](https://avro.apache.org/docs/1.11.1/specification/_print/#preamble).
+Take a look at [Avro documentation](https://avro.apache.org/docs/1.11.1/specification/_print/#preamble) for more info.
 
 
 **Avro Converter**
@@ -133,7 +133,12 @@ You can add new fields or change things around, and it ensures old data can stil
 Avro message format can be configured one of two ways, in the Kafka Connect worker configuration or in the connector configuration. Using Avro in conjunction with the schema registry allows for much more compact messages.
 
 #### Kafka Connect Worker configuration ####
-Configuring Avro at the Kafka Connect worker involves using the same steps above for MySQL but instead using the docker-compose-mysql-avro-worker.yaml configuration file instead. The Compose file configures the Connect service to use the Avro (de-)serializers for the Connect instance. Run the following commands to get the services up and running.
+Configuring Avro at the Kafka Connect worker involves using the same steps above for MySQL but instead using the docker-compose-mysql-avro-worker.yaml configuration file instead. The Compose file configures the Connect service to use the Avro (de-)serializers for the Connect instance. Run the following commands to get the services up and running. 
+Files to be used:
+* docker-compose-mysql-avro-worker.yaml 
+* register-mysql-avro.json
+
+Run the following commands to start the services:
 
 ```
 export DEBEZIUM_VERSION=2.0.1.Final
@@ -181,7 +186,7 @@ To list all the topics on the Kafka broker, run the following command:
     --list
 ```
 
-Since the connector is not up, there will be no topics other than the default one.
+Since the connector is not up, there will be no topics other than the default ones.
 
 Let's start out first connector:
 
@@ -288,17 +293,31 @@ docker exec mysql-avro-connector-final-kafka-1 /kafka/bin/kafka-console-consumer
 
 The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box.
 Since our data is stored in Avro binary format (configured at the connect worker level), this consumer will display unreadable byte data instead of decoding the Avro messages.
+To stops and removes containers and networks:
+
+```
+docker compose -f docker-compose-mysql-avro-worker.yaml
+```
 
 
 
+### Debezium Connector configuration ###
 
 
+Configuring Avro at the Debezium Connector involves specifying the converter and schema registry as a part of the connectors configuration. File to be used: 
 
+* docker-compose-mysql-avro-connector.yaml 
+* register-mysql-avro.json configuration files. 
+* register-mysql-nonavro.json ( for testing purposes)
 
+The Compose file configures the Connect service to use the default (de-)serializers for the Connect instance. The connector configuration file configures the connector but explicitly sets the (de-)serializers for the connector to use Avro and specifies the location of the schema registry.
 
+Run the following commands to start the services:
 
-
-
+```
+export DEBEZIUM_VERSION=2.0.1.Final
+docker compose -f docker-compose-mysql-avro-connector.yaml up
+```
 
 
 
