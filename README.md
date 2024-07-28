@@ -252,14 +252,42 @@ Alter the customers table structure: For example, add a new column:
 
 5. INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
 
-Now, if you look at your consumer, you will notice that a new line with a new schemaId appeared because a new schema version was used for the newly added row, which is necessary to accommodate the structural changes in the table. This ensures data integrity and proper deserialization by consumers. 
+Now, if you look at your consumer, you will notice that a new line appeared because a new schema version was used for the newly added row, which is necessary to accommodate the structural changes in the table. This ensures data integrity and proper deserialization by consumers. 
+
+To verifity that a new schema was added, list all schema versions:
+
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/ | jq 
+```
+
+You should see an array with two elements. Retrieve the first schema version:
+
+
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1 | jq '.schema | fromjson'
+```
+
+Retrieve the second schema version:
+
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/2 | jq '.schema | fromjson'
+```
 
 
 
+Now, open a new consumer using the following command:
+
+```
+docker exec mysql-avro-connector-final-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbserver1.inventory.customers
+```
 
 
-
-
+The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box.
+Since our data is stored in Avro binary format (configured at the connect worker level), this consumer will display unreadable byte data instead of decoding the Avro messages.
 
 
 
