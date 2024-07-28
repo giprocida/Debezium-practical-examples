@@ -133,6 +133,161 @@ You can add new fields or change things around, and it ensures old data can stil
 Avro message format can be configured one of two ways, in the Kafka Connect worker configuration or in the connector configuration. Using Avro in conjunction with the schema registry allows for much more compact messages.
 
 #### Kafka Connect Worker configuration ####
-Configuring Avro at the Kafka Connect worker involves using the same steps above for MySQL but instead using the docker-compose-mysql-avro-worker.yaml configuration file instead. The Compose file configures the Connect service to use the Avro (de-)serializers for the Connect instance and starts one more additional service, the Confluent schema registry.
+Configuring Avro at the Kafka Connect worker involves using the same steps above for MySQL but instead using the docker-compose-mysql-avro-worker.yaml configuration file instead. The Compose file configures the Connect service to use the Avro (de-)serializers for the Connect instance. Run the following commands to get the services up and running.
+
+```
+export DEBEZIUM_VERSION=2.0.1.Final
+docker compose -f docker-compose-mysql-avro-worker.yaml up
+```
+
+You're going to notice five services up and running: one for the MySQL database, one for ZooKeeper, one for the Schema Registry, one for the Kafka broker, and one for Kafka Connect.
 
 
+To check the status of the Apicurio Registry, use the following command:
+
+```
+curl -i -H "Accept:application/json" localhost:8081
+```
+
+A successful response will return a status code of 200 OK .
+
+To list all artifacts in the default group of the Apicurio Registry and verify if any schema is registered, use the following command:
+
+```
+curl -H "Accept:application/json" localhost:8081/subjects | jq
+```
+
+Since no schema is registered, the output will be an empty array.
+
+To list the available connectors on Kafka connect, use the following command:
+
+```
+curl -X GET localhost:8083/connectors | jq
+```
+
+Since no connector is deployed, the output will be an empty array.
+
+
+To list the available connector plugins installed, use the following command:
+
+```
+curl -X GET localhost:8083/connector-plugins | jq
+```
+
+To list all the topics on the Kafka broker, run the following command:
+```
+ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
+    --bootstrap-server kafka:9092 \
+    --list
+```
+
+Since the connector is not up, there will be no topics other than the default one.
+
+Let's start out first connector:
+
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql.json
+```
+
+After running the above commands, analyze their output. You will notice that each table within the monitored database, as specified in the configuration file, now has a corresponding topic in the Kafka broker. All schemas are registered in the Schema Registry container, and the new connector has been successfully created.
+
+To review the configuration file used to create the connector, run:
+
+```
+curl -X GET http://localhost:8083/connectors/inventory-connector/config | jq
+```
+
+
+You can access the first version of the schema for customers values like so:
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1 | jq '.schema | fromjson'
+```
+
+
+The Schema Registry provides the `kafka-avro-console-consumer`, a specialized tool for consuming Avro-encoded messages. It integrates with the Confluent Schema Registry to automatically handle Avro serialization and deserialization:
+
+
+```
+docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --topic dbserver1.inventory.customers
+```
+
+The output will look like this:
+
+```
+{"id":1001}	{"before":null,"after":{"dbserver1.inventory.customers.Value":{"id":1001,"first_name":"Sally","last_name":"Thomas","email":"sally.thomas@acme.com"}},"source":{"version":"2.0.1.Final","connector":"mysql","name":"dbserver1","ts_ms":1722093025000,"snapshot":{"string":"first_in_data_collection"},"db":"inventory","sequence":null,"table":{"string":"customers"},"server_id":0,"gtid":null,"file":"mysql-bin.000003","pos":157,"row":0,"thread":null,"query":null},"op":"r","ts_ms":{"long":1722093025250},"transaction":null}
+{"id":1002}	{"before":null,"after":{"dbserver1.inventory.customers.Value":{"id":1002,"first_name":"George","last_name":"Bailey","email":"gbailey@foobar.com"}},"source":{"version":"2.0.1.Final","connector":"mysql","name":"dbserver1","ts_ms":1722093025000,"snapshot":{"string":"true"},"db":"inventory","sequence":null,"table":{"string":"customers"},"server_id":0,"gtid":null,"file":"mysql-bin.000003","pos":157,"row":0,"thread":null,"query":null},"op":"r","ts_ms":{"long":1722093025250},"transaction":null}
+{"id":1003}	{"before":null,"after":{"dbserver1.inventory.customers.Value":{"id":1003,"first_name":"Edward","last_name":"Walker","email":"ed@walker.com"}},"source":{"version":"2.0.1.Final","connector":"mysql","name":"dbserver1","ts_ms":1722093025000,"snapshot":{"string":"true"},"db":"inventory","sequence":null,"table":{"string":"customers"},"server_id":0,"gtid":null,"file":"mysql-bin.000003","pos":157,"row":0,"thread":null,"query":null},"op":"r","ts_ms":{"long":1722093025250},"transaction":null}
+{"id":1004}	{"before":null,"after":{"dbserver1.inventory.customers.Value":{"id":1004,"first_name":"Anne","last_name":"Kretchmar","email":"annek@noanswer.org"}},"source":{"version":"2.0.1.Final","connector":"mysql","name":"dbserver1","ts_ms":1722093025000,"snapshot":{"string":"last_in_data_collection"},"db":"inventory","sequence":null,"table":{"string":"customers"},"server_id":0,"gtid":null,"file":"mysql-bin.000003","pos":157,"row":0,"thread":null,"query":null},"op":"r","ts_ms":{"long":1722093025250},"transaction":null}
+```
+
+Each message includes detailed information about the state of the record before and after the change, metadata about the event, and the type of operation performed. This allows users to have a comprehensive, real-time view of database modifications. 
+Keep the terminal window or tab open and visible on your screen.
+
+
+
+
+
+if you alter the structure of the `customers` table in the database and trigger another change event, a new version of that schema will be available in the Apicurio Registry. Follow these steps to achieve this:
+
+1. Log into the MySQL container (use VSCode for that).
+
+2. mysql -u root -p
+
+Switch to the inventory database
+
+3. use inventory;
+
+Alter the customers table structure: For example, add a new column:
+
+4. ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+
+ Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+
+
+
+5. INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
+
+Now, if you look at your consumer, you will notice that a new line with a new schemaId appeared because a new schema version was used for the newly added row, which is necessary to accommodate the structural changes in the table. This ensures data integrity and proper deserialization by consumers. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The kafka-console-consumer is a generic consumer script that can consume messages from Kafka topics and print them to the console. It does not handle any specific serialization format out of the box and relies on the user to specify the appropriate deserializers if needed.
+ The script will not properly decode Avro messages and will display unreadable byte data.
+
+he kafka-avro-console-consumer is a specialized version of the console consumer provided by Confluent. It is designed to work with Avro-encoded messages and integrates with the Confluent Schema Registry to automatically handle Avro serialization and deserialization.
