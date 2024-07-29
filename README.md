@@ -101,7 +101,7 @@ A serializer in Kafka is responsible for converting data objects into a byte arr
 
 Kafka provides serializers for common data types. Some of them are:
 
-1. **String Serialization**: Converts string data into byte arrays. Commonly used for text-based data such as log entries, text messages, and notifications.</br>
+1. **String Serialization**: Converts string data into byte arrays. Commonly used for text-based data such as log entries, text messages, and notifications.
 
 **Example Scenario**: A logging system that sends application log messages to a Kafka topic for centralized logging and analysis.
 * Log Message:"INFO: User login successful at 2024-07-29 12:00:00"
@@ -112,14 +112,14 @@ Kafka provides serializers for common data types. Some of them are:
 **Example Scenario**: A file transfer system that sends binary files (e.g., images) via Kafka.
 
 
-3. JSON Serialization: Converts objects to JSON strings and then to byte arrays for readable and structured data. Ideal for sending structured data such as records or complex objects.</br>
+3. **JSON Serialization**: Converts objects to JSON strings and then to byte arrays for readable and structured data. Ideal for sending structured data such as records or complex objects.</br>
 
 **Example Scenario**: A system that sends user data as JSON objects to Kafka for processing and storage.
 
 * Key: Person ID (e.g., "PersonID123")
 * Value: JSON representation of the Person object (e.g., {"name": "John Doe", "age": 30})
 
-4. Avro Serialization: Uses  Avro for data serialization, providing efficient serialization and a rich data structure. Suitable for high-performance and schema-based data processing, ensuring data consistency and type enforcement.
+4. **Avro Serialization**: Uses Avro for data serialization, providing efficient serialization and a rich data structure. Suitable for high-performance and schema-based data processing, ensuring data consistency and type enforcement.
 
 **Example Scenario**: A data pipeline that sends complex records defined by Avro schemas to Kafka for efficient processing.
 
