@@ -220,7 +220,7 @@ curl -X GET localhost:8083/connector-plugins | jq
 
 To list all the topics on the Kafka broker, run the following command:
 ```
- docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
     --bootstrap-server kafka:9092 \
     --list
 ```
@@ -446,7 +446,7 @@ This consumer will display unreadable byte data instead of decoding the Avro mes
 
 
 
-##### Flexibility with Connector-Level Serialization #####
+#### Flexibility with Connector-Level Serialization ####
 
 Setting up the serializer at the connector level in Kafka Connect provides flexibility in how data is serialized and deserialized. You might have one pipeline for a set of topics/tables where data is serialized in Avro format for efficient storage and schema evolution, and another pipeline where data is serialized in JSON or String. Let's create our first connector that will deal with data which are not in avro format:
 
@@ -495,6 +495,67 @@ or
 
 
 
+ Let's create our second connector that will deal with data which will deal with data in avro format:
+
+
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-avro.json
+```
+
+
+
+What is important to highlight here are two things:
+
+1. We do set explicity any Avro Serializer
+
+2. For each table listed in `table.include.list` parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In our case three topics will be created:
+
+
+* dbserver.inventory.customers
+* dbserver.inventory.addresses
+
+
+
+Let's review the configuration for each connector once more time:
+
+
+```
+curl -X GET localhost:8083/connectors/inventory-connector/config | jq
+```
+
+```
+curl -X GET localhost:8083/connectors/nonavro-connector/config | jq
+```
+
+
+
+To list all the topics that we created on the Kafka broker upon creation of each connector, run the following command:
+
+
+```
+ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
+    --bootstrap-server kafka:9092 \
+    --list
+```
+
+
+
+Now, open a new consumer from the kafka container using the following command:
+
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbmytest1.inventory.orders
+```
+
+
+
+
+
+
 
 
 
@@ -512,12 +573,111 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
     --bootstrap-server kafka:9092 \
     --from-beginning \
     --property print.key=true \
-    --topic dbserver1.inventory.customers
+    --topic dbmytest1.inventory.orders
 ```
 
 
 
-This time the consumer will be able to consume the data since we configuered neither  Avro serialiaer and nor specifiee the location of the schema registry. 
+This time the consumer will be able to consume the data since we configuered neither  Avro serialiaer and nor specifiee the location of the schema registry. Keep the terminal window or tab open and visible on your screen.
+Let's repeat the steps above one by one. 
+
+If you alter the structure of the `orders` table in the database and trigger another change event, a new version of that schema will be available in the Apicurio Registry. Follow these steps to achieve this:
+
+1. Log into the MySQL container (use VSCode for that).
+
+2. mysql -u root -p
+
+Switch to the inventory database
+
+3. use inventory;
+
+Alter the `geom` table structure: For example, add a new column:
+
+4. ALTER TABLE geom ADD COLUMN size VARCHAR(20);
+
+ Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+
+5. INSERT INTO geom (id, g, h, size) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL,'10');
+
+
+
+
+
+Now, if you look at your consumer, you will notice that a new line appeared because because a change in the `geom` table was detected. However, altough the table structure change that will reflect in no change in the schema. In fact, there will be no schema with the prefix `dbmytest1`.
+
+
+
+Create a new consumer that understands Avro :
+
+```
+docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --topic dbserver1.inventory.customers
+```
+
+
+Let's repeat the steps above one by one. 
+
+If you alter the structure of the `orders` table in the database and trigger another change event, a new version of that schema will be available in the Confluent Registry. Follow these steps to achieve this:
+
+1. Log into the MySQL container (use VSCode for that).
+
+2. mysql -u root -p
+
+Switch to the inventory database
+
+3. use inventory;
+
+Alter the `customers` table structure: For example, add a new column:
+
+4. ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+
+ Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+
+5. INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
+
+
+
+
+To verify that a new schema was added, list all schema versions:
+
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/ | jq 
+```
+
+You should see an array with two elements. Retrieve the first schema version:
+
+
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1 | jq '.schema | fromjson'
+```
+
+Retrieve the second schema version:
+
+```
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/2 | jq '.schema | fromjson'
+```
+
+
+
+
+
+Now, open a new consumer from the kafka container using the following command that consumes data stored in Avro format:
+
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbmytest1.inventory.customers
+```
+
+
+
 
 Now please delete the connector to run the next section:
 ```
