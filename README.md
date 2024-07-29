@@ -101,15 +101,16 @@ A serializer in Kafka is responsible for converting data objects into a byte arr
 
 Kafka provides serializers for common data types. Some of them are:
 
-1. String Serialization: Converts string data into byte arrays. Commonly used for text-based data such as log entries, text messages, and notifications.
+1. **String Serialization**: Converts string data into byte arrays. Commonly used for text-based data such as log entries, text messages, and notifications.
 **Example Scenario**: A logging system that sends application log messages to a Kafka topic for centralized logging and analysis.
+* Log Message:"INFO: User login successful at 2024-07-29 12:00:00"
 
 
 2. Byte Array Serialization: Handles data already in byte array format, suitable for raw binary datal. Commonly used for transmitting images, files, or any pre-serialized binary data.
 **Example Scenario**: A file transfer system that sends binary files (e.g., images) via Kafka.
 
 
-3. JSON Serialization: Converts objects to JSON strings and then to byte arrays for readable and structured data. Ideal for sending structured data such as records or complex objects. 
+3. JSON Serialization: Converts objects to JSON strings and then to byte arrays for readable and structured data. Ideal for sending structured data such as records or complex objects.</br>
 **Example Scenario**: A system that sends user data as JSON objects to Kafka for processing and storage.
 
 * Key: Person ID (e.g., "PersonID123")
