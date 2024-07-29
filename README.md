@@ -107,7 +107,7 @@ Kafka provides serializers for common data types. Some of them are:
 * Log Message:"INFO: User login successful at 2024-07-29 12:00:00"
 
 
-2. Byte Array Serialization: Handles data already in byte array format, suitable for raw binary datal. Commonly used for transmitting images, files, or any pre-serialized binary data.</br>
+2. **Byte Array Serialization**: Handles data already in byte array format, suitable for raw binary datal. Commonly used for transmitting images, files, or any pre-serialized binary data.</br>
 
 **Example Scenario**: A file transfer system that sends binary files (e.g., images) via Kafka.
 
@@ -116,21 +116,21 @@ Kafka provides serializers for common data types. Some of them are:
 
 **Example Scenario**: A system that sends user data as JSON objects to Kafka for processing and storage.
 
-* Key: Person ID (e.g., "PersonID123")
+* Key: Person ID (e.g., "123")
 * Value: JSON representation of the Person object (e.g., {"name": "John Doe", "age": 30})
 
 4. **Avro Serialization**: Uses Avro for data serialization, providing efficient serialization and a rich data structure. Suitable for high-performance and schema-based data processing, ensuring data consistency and type enforcement.
 
 **Example Scenario**: A data pipeline that sends complex records defined by Avro schemas to Kafka for efficient processing.
 
-* Key: Person ID (e.g., "PersonID123")
+* Key: Person ID (e.g., "123")
 * Value: JSON representation of the Person object (e.g., {"name": "John Doe", "age": 30})
 
 
 
 
 
-**Avro Converter**
+<!-- **Avro Converter**
 
 Helps Kafka Connect interact with other systems by converting data into Avro binary format:
 
@@ -150,7 +150,7 @@ The Avro Serializer converts data from its original format, like Java objects, i
 * Deserialization: When a Kafka consumer receives data, it needs to unpack this data back into its original format to use it.
 The Avro Serializer takes the Avro binary format and converts it back into the original format, like Java objects, so that the data can be easily processed.
 * Schema Integration: Just like the Avro Converter, the Avro Serializer uses schemas (blueprints) to know how the data should be structured. It works with the schema registry to check that the data matches the expected structure before sending or after receiving it. This ensures that the data is consistent and reliable, as both the sender and receiver use the same blueprint to understand the data.
-
+ -->
 
 ### What is Avro Binary Format? ### 
 Imagine you have a message that you want to send to someone, but you want to make it as small and efficient as possible. Avro binary format is like a special way of packaging that message so it's really compact, fast to send, and easy for the receiver to understand.
