@@ -130,27 +130,6 @@ Kafka provides serializers for common data types. Some of them are:
 
 
 
-<!-- **Avro Converter**
-
-Helps Kafka Connect interact with other systems by converting data into Avro binary format:
-
-
-* Serialization: Imagine you have data in a simple format like JSON, which is easy to read but not very efficient to send over the network. The Avro Converter takes this JSON data and packs it into a smaller, more efficient format called Avro binary format
-* Deserialization: When the data reaches its destination, it needs to be unpacked back into its original format, like JSON, so that it can be easily used.
-The Avro Converter handles this unpacking, transforming the Avro binary format back into JSON.
-* Schema Management: The Avro Converter works with a schema registry, which is a central place where all these blueprints (schemas) are stored. This registry helps keep track of all the different versions of the data structure, ensuring that both the sender and receiver understand the data in the same way.
-
-**Avro Serializer**
-
-Helps Kafka producers and consumers work with data in Avro format.
-
-
-* Serialization: When a Kafka producer wants to send data, it needs to pack this data efficiently.
-The Avro Serializer converts data from its original format, like Java objects, into the compact Avro binary format. This makes the data smaller and faster to send.
-* Deserialization: When a Kafka consumer receives data, it needs to unpack this data back into its original format to use it.
-The Avro Serializer takes the Avro binary format and converts it back into the original format, like Java objects, so that the data can be easily processed.
-* Schema Integration: Just like the Avro Converter, the Avro Serializer uses schemas (blueprints) to know how the data should be structured. It works with the schema registry to check that the data matches the expected structure before sending or after receiving it. This ensures that the data is consistent and reliable, as both the sender and receiver use the same blueprint to understand the data.
- -->
 
 ### What is Avro Binary Format? ### 
 Imagine you have a message that you want to send to someone, but you want to make it as small and efficient as possible. Avro binary format is like a special way of packaging that message so it's really compact, fast to send, and easy for the receiver to understand.
@@ -276,7 +255,7 @@ Keep the terminal window or tab open and visible on your screen.
 
 
 
-If you alter the structure of the `customers` table in the database and trigger another change event, a new version of that schema will be available in the Apicurio Registry. Follow these steps to achieve this:
+If you alter the structure of the `customers` table in the database and trigger another change event, a new version of that schema will be available in the schema registry. Follow these steps to achieve this:
 
 1. Log into the MySQL container (use VSCode for that).
 
@@ -341,6 +320,7 @@ docker compose -f docker-compose-mysql-avro-worker.yaml
 
 
 
+
 #### Debezium Connector configuration ####
 
 
@@ -356,6 +336,13 @@ In this example, we will set up two pipelines:
 
 * A pipeline where data is serialized in Avro format.
 * A pipeline where data is serialized in JSON or String format.
+
+Run the following commands to start the services:
+
+```
+export DEBEZIUM_VERSION=2.0.1.Final
+docker compose -f docker-compose-mysql-avro-connector.yaml up
+```
 
 
 **Setting Up the Non-Avro Connector** 
@@ -415,13 +402,127 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
     --list
 ```
 
+You can also query the schema registry to determine which topics are set up to handle Avro serialization:
 
-*Note*: This command lists all the topics in the Kafka broker, including those created by each connector using their respective naming conventions. 
+```
+curl -H "Accept:application/json" localhost:8081/subjects | jq
+```
 
-For example:
 
-* Topics created by the non-Avro connector may include dbmytest1.inventory.geom, dbmytest1.inventory.orders, and dbserver1.inventory.orders.
-* Topics created by the Avro connector may include dbserver.inventory.customers and dbserver.inventory.addresses.
+
+
+Now, let's create a consumer from the Kafka container to consume data from a topic where data is serialized in Avro format:
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbserver1.inventory.customers
+```
+
+Let's use a consumer that understands Avro serialization. We can achieve this by using the kafka-avro-console-consumer from the `schema-registry container`:
+
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbserver1.inventory.customers
+```
+
+
+The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box.
+
+Since our data is stored in Avro binary format (configured at the connect worker level), this consumer will display unreadable byte data instead of decoding the Avro messages.
+
+
+
+
+
+Let's now open a new consumer that does understand avro serialization. In order to do that, we call the `kafka-avro-console-consumer` from the schema-registry container:
+
+
+
+```
+docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --topic dbserver1.inventory.customers
+```
+
+
+Each message includes detailed information about the state of the record before and after the change, metadata about the event, and the type of operation performed. This allows users to have a comprehensive, real-time view of database modifications. 
+Keep the terminal window or tab open and visible on your screen. Now repeat the step
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
