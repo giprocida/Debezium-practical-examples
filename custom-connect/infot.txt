@@ -1,0 +1,2 @@
+the repo i use to create this docker image:
+https://github.com/debezium/container-images/blob/main/connect-base/1.9/docker-entrypoint.sh
