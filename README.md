@@ -353,7 +353,7 @@ docker compose -f docker-compose-mysql-avro-worker.yaml down
 In this example, we will set up two pipelines:
 
 * A pipeline where data is serialized in Avro format.
-* A pipeline where data is serialized in JSON or String format.
+* A pipeline where data is serialized in JSON.
 
 Run the following commands to start the services:
 
