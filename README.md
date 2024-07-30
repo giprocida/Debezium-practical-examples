@@ -455,7 +455,7 @@ docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-co
 
 The will properly decode the messages using the schema registry. If you alter the structure of the customers table in the database and trigger another change event, a new version of that schema will be available in the schema registry. Follow the steps outlined earlier in the documentation for creating consumers to observe the changes.
 
-To consume data from the `dbmytest1.inventory`, you can simply create a consumer using the kafka-console-consumer tooL
+To consume data from the `dbmytest1.inventory.geom`, you can simply create a consumer using the kafka-console-consumer tooL
 
 
 ```
@@ -463,7 +463,7 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
     --bootstrap-server kafka:9092 \
     --from-beginning \
     --property print.key=true \
-    --topic dbserver1.inventory.customers
+    --topic dbmytest1.inventory.geom
 ```
 
 Keep the terminal open and observe the incoming messages. To see the consumer in action, we need to trigger a change event by adding a new row to the `geom` table:
