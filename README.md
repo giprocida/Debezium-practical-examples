@@ -1,6 +1,6 @@
 ## Debezium Tutorial ##
 
-deploys the topology of services as defined in the
+This repository contains multiple topologies of services defined through various Docker Compose files, designed to help you learn and experiment with Debezium. Each topology represents a different configuration of services, providing a range of learning scenarios and use cases.
 
 ## Prerequisites ##
 
@@ -410,7 +410,6 @@ curl -H "Accept:application/json" localhost:8081/subjects | jq
 
 
 
-
 Now, let's create a consumer from the Kafka container to consume data from a topic where data is serialized in Avro format:
 
 ```
@@ -421,28 +420,10 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
     --topic dbserver1.inventory.customers
 ```
 
-Let's use a consumer that understands Avro serialization. We can achieve this by using the kafka-avro-console-consumer from the `schema-registry container`:
+Since our data is stored in Avro binary format, this consumer will display unreadable byte data instead of decoding the Avro messages.
 
 
-```
-docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --topic dbserver1.inventory.customers
-```
-
-
-The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box.
-
-Since our data is stored in Avro binary format (configured at the connect worker level), this consumer will display unreadable byte data instead of decoding the Avro messages.
-
-
-
-
-
-Let's now open a new consumer that does understand avro serialization. In order to do that, we call the `kafka-avro-console-consumer` from the schema-registry container:
-
+Let's use a consumer that understands Avro serialization:
 
 
 ```
@@ -454,9 +435,8 @@ docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-co
     --topic dbserver1.inventory.customers
 ```
 
+The will properly decode the messages using the schema registry. If you alter the structure of the customers table in the database and trigger another change event, a new version of that schema will be available in the schema registry. Follow the steps outlined earlier in the documentation for creating consumers to observe the changes.
 
-Each message includes detailed information about the state of the record before and after the change, metadata about the event, and the type of operation performed. This allows users to have a comprehensive, real-time view of database modifications. 
-Keep the terminal window or tab open and visible on your screen. Now repeat the step
 
 
 
