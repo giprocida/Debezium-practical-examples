@@ -374,7 +374,7 @@ curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 
 Key Points:
 
 * Explicit Avro Serializer: The configuration explicitly sets the Avro Serializer.
-* Topics Creation: For each table listed in the table.include.list parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In this case, the following topics will be created:
+* Topics Creation: For each table listed in the `table.include.list parameter`, the connector will create corresponding Kafka topics using the specified topic.prefix. In this case, the following topics will be created:
 
   * dbserver.inventory.customers
   * dbserver.inventory.addresses
@@ -437,201 +437,19 @@ docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-co
 
 The will properly decode the messages using the schema registry. If you alter the structure of the customers table in the database and trigger another change event, a new version of that schema will be available in the schema registry. Follow the steps outlined earlier in the documentation for creating consumers to observe the changes.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Configuring Avro at the Debezium Connector involves specifying the converter and schema registry as a part of the connectors configuration. File to be used: 
-
-* docker-compose-mysql-avro-connector.yaml 
-* register-mysql-avro.json configuration files. 
-* register-mysql-nonavro.json ( for testing purposes)
-
-The Compose file configures the Connect service to use the default (de-)serializers for the Connect instance. The connector configuration file configures the connector but explicitly sets the (de-)serializers for the connector to use Avro and specifies the location of the schema registry. 
-Setting up the serializer at the connector level in Kafka Connect provides flexibility in how data is serialized and deserialized. In our example we weill have one pipeline for a set of topics/tables where data is serialized in Avro format for efficient storage and schema evolution, and another pipeline where data is serialized in JSON or String. Let's create our first connector that will deal with data which are not in avro format:
-
-```
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-nonavro.json
-```
-
-
-What is important to highlight here are two things:
-
-1. We don t set explicity any Avro Serializer
-
-2. For each table listed in `table.include.list` parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In our case three topics will be created:
-
-
-* dbmytest1.inventory.geom
-* dbmytest1.inventory.orders
-* dbserver1.inventory.orders
-
-
-Let's create our second connector that will deal with data which will deal with data in avro format:
+To consume data from the `dbmytest1.inventory`, you can simply create a consumer using the kafka-console-consumer tooL
 
 
 ```
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-avro.json
-```
-
-
-
-What is important to highlight here are two things:
-
-1. We do set explicity any Avro Serializer
-
-2. For each table listed in `table.include.list` parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In our case three topics will be created:
-
-
-* dbserver.inventory.customers
-* dbserver.inventory.addresses
-
-
-
-Let's review the configuration for each connector once more time:
-
-
-```
-curl -X GET localhost:8083/connectors/inventory-connector/config | jq
-```
-
-```
-curl -X GET localhost:8083/connectors/nonavro-connector/config | jq
-```
-
-
-
-To list all the topics that we created on the Kafka broker upon creation of each connector, run the following command:
-
-
-```
- docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
-    --bootstrap-server kafka:9092 \
-    --list
-```
-
-
-
-
-
-
-<!-- Run the following commands to start the services:
-
-```
-export DEBEZIUM_VERSION=2.0.1.Final
-docker compose -f docker-compose-mysql-avro-connector.yaml up
-```
-
-Let's start out first connector. Remeber that this file configures the connect explicitly sets Avro serialiaer and specifies the location of the schema registry:
-
-```
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-avro.json
-```
-
-
-
-To list the available connectors on Kafka connect, use the following command:
-
-```
-curl -X GET localhost:8083/connectors | jq
-```
-
-
-and check its configuration by running:
-
-```
-curl -X GET localhost:8083/connectors/inventory-connector/config | jq
-```
-
-
-
-Let's repeat the steps above one by one. Let's open a consumer from the schema registry cobtainers that undetstand avro-encoded messages.
-
-
-```
-docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-console-consumer \
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
     --bootstrap-server kafka:9092 \
     --from-beginning \
     --property print.key=true \
-    --property schema.registry.url=http://schema-registry:8081 \
     --topic dbserver1.inventory.customers
 ```
 
+Keep the terminal open and observe the incoming messages. To see the consumer in action, we need to trigger a change event by adding a new row to the `geom` table:
 
-If you alter the structure of the `customers` table in the database and trigger another change event, a new version of that schema will be available in the Apicurio Registry. Follow these steps to achieve this:
 
 1. Log into the MySQL container (use VSCode for that).
 
@@ -641,85 +459,80 @@ Switch to the inventory database
 
 3. use inventory;
 
-Alter the customers table structure: For example, add a new column:
+Alter the `geom` table structure: For example, add a new column:
 
-4. ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+4. ALTER TABLE geom ADD COLUMN mytext VARCHAR(20);
 
  Trigger a change event by updating the table: Insert a new row to reflect the schema change;
 
-5. INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
+5. INSERT INTO geom (id, g, h, size) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL,'Hello')
 
-
-
-To verifity that a new schema was added, list all schema versions:
-
-```
-curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/ | jq 
-```
-
-
-and 
-
-```
-
-```
-
-
-Now, open a new consumer from the kafka container using the following command:
-
-```
-docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --topic dbserver1.inventory.customers
-```
-
-
-This consumer will display unreadable byte data instead of decoding the Avro messages as we expected.
+You should see a new message indicating that a change in the geom table was detected.
 
 
 
 
 
- -->
 
 
 
 
-#### Flexibility with Connector-Level Serialization ####
-
-Setting up the serializer at the connector level in Kafka Connect provides flexibility in how data is serialized and deserialized. You might have one pipeline for a set of topics/tables where data is serialized in Avro format for efficient storage and schema evolution, and another pipeline where data is serialized in JSON or String. Let's create our first connector that will deal with data which are not in avro format:
-
-
-```
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-nonavro.json
-```
-
-
-What is important to highlight here are two things:
-
-1. We don t set explicity any Avro Serializer
-
-2. For each table listed in `table.include.list` parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In our case three topics will be created:
-
-
-* dbmytest1.inventory.geom
-* dbmytest1.inventory.orders
-* dbserver1.inventory.orders
 
 
 
-Now, open a new consumer from the kafka container using the following command:
 
-```
-docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --topic dbserver1.inventory.customers
-```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### EXTRA
 
 This time the consumer will be able to 
 The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box but since our data are stored in a format which is not Avro, it will be able to consume those data. To find out which serializer was used to convert data into binary and viceversa you can log into the connect container:
