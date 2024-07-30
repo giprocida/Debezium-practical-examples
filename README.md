@@ -491,7 +491,7 @@ You should see a new message indicating that a change in the geom table was dete
 
 
 
-
+**note**: If you consume messages from `dbmytest1.inventory.geom` using the kafka-avro-console-consumer you will still encounter problem with deserializing. This because the consumer expects Avro-serialized data but is receiving data in different format;
 
 
 
