@@ -259,21 +259,29 @@ If you alter the structure of the `customers` table in the database and trigger 
 
 1. Log into the MySQL container (use VSCode for that).
 
-2. mysql -u root -p
+2. Log into the MySQL RDBMS:
 
-Switch to the inventory database
+```
+mysql -u root -p
+```
 
-3. use inventory;
+3. Switch to the inventory database
 
-Alter the customers table structure: For example, add a new column:
+```
+use inventory;
+```
 
-4. ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+4. Alter the `customers` table structure: For example, add a new column:
 
- Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+```
+ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+```
 
+5. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
 
-
-5. INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
+```
+INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
+```
 
 Now, if you look at your consumer, you will notice that a new line appeared because a new schema version was used for the newly added row, which is necessary to accommodate the structural changes in the table. This ensures data integrity and proper deserialization by consumers. 
 
