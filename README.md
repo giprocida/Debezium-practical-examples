@@ -801,7 +801,7 @@ curl -i -X DELETE -H "Accept:application/json" localhost:8083/connectors/invento
 ### Managing Connectors
 To check the status, pause, and resume connectors using curl:
 
-To chec the status of the `inventory-connector`:
+To check the status of the `inventory-connector`:
 
 ```
 curl -H "Accept:application/json" localhost:8083/connectors/inventory-connector/status | jq
@@ -822,8 +822,9 @@ curl -i -X PUT -H "Accept:application/json" localhost:8083/connectors/inventory-
 
 To delete the `inventory-connector` connector:
 
+```
 curl -i -X DELETE -H "Accept:application/json" localhost:8083/connectors/inventory-connector 
-
+```
 
 
 
