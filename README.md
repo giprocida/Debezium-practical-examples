@@ -174,7 +174,7 @@ curl -i -H "Accept:application/json" localhost:8081
 
 A successful response will return a status code of 200 OK .
 
-To list all artifacts in the default group of the Apicurio Registry and verify if any schema is registered, use the following command:
+To list all schemas registered in the `Confluent Schema Registry`, use the following command:
 
 ```
 curl -H "Accept:application/json" localhost:8081/subjects | jq
@@ -211,8 +211,6 @@ Let's start out first connector:
 ```
 curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql.json
 ```
-
-After running the above commands, analyze their output. You will notice that each table within the monitored database, as specified in the configuration file, now has a corresponding topic in the Kafka broker. All schemas are registered in the Schema Registry container, and the new connector has been successfully created.
 
 To review the configuration file used to create the connector, run:
 
