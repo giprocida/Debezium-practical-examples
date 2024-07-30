@@ -455,7 +455,7 @@ docker exec debezium-practical-examples-schema-registry-1 /usr/bin/kafka-avro-co
 
 The will properly decode the messages using the schema registry. If you alter the structure of the customers table in the database and trigger another change event, a new version of that schema will be available in the schema registry. Follow the steps outlined earlier in the documentation for creating consumers to observe the changes.
 
-To consume data from the `dbmytest1.inventory.geom`, you can simply create a consumer using the kafka-console-consumer tooL
+To consume data from the topic `dbmytest1.inventory.geom`, you can simply create a consumer using the kafka-console-consumer tooL
 
 
 ```
@@ -471,19 +471,28 @@ Keep the terminal open and observe the incoming messages. To see the consumer in
 
 1. Log into the MySQL container (use VSCode for that).
 
-2. mysql -u root -p
+2. Log into the MySQL RDBMS:
 
-Switch to the inventory database
+```
+mysql -u root -p
+```
 
-3. use inventory;
+3. Switch to the inventory database
 
-Alter the `geom` table structure: For example, add a new column:
+```
+use inventory;
+```
 
-4. ALTER TABLE geom ADD COLUMN mytext VARCHAR(20);
+4. Alter the `geom` table structure: For example, add a new column:
 
- Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+```
+ALTER TABLE geom ADD COLUMN mytext VARCHAR(20);
+```
+5. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
 
-5. INSERT INTO geom (id, g, h, size) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL,'Hello')
+```
+INSERT INTO geom (id, g, h, size) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL,'Hello')
+```
 
 You should see a new message indicating that a change in the geom table was detected.
 
@@ -491,7 +500,7 @@ You should see a new message indicating that a change in the geom table was dete
 
 
 
-**note**: If you consume messages from `dbmytest1.inventory.geom` using the kafka-avro-console-consumer you will still encounter problem with deserializing. This because the consumer expects Avro-serialized data but is receiving data in different format;
+**note**: If you consume messages from the topic `dbmytest1.inventory.geom` using the kafka-avro-console-consumer you will still encounter problem with deserializing. This because the consumer expects Avro-serialized data but is receiving data in different format;
 
 
 
