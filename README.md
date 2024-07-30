@@ -281,7 +281,7 @@ ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
 INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
 ```
 
-Now, if you look at your consumer, you will notice that a new line appeared because a new schema version was used for the newly added row, which is necessary to accommodate the structural changes in the table. This ensures data integrity and proper deserialization by consumers. 
+Now, if you look at your consumer, you will notice that a new line appeared because a new schema version was used for the newly added row, which is necessary to accommodate the structural changes in the table. 
 
 To verifity that a new schema was added, list all schema versions:
 
@@ -317,14 +317,24 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
 
 The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box.
 
-Since our data is stored in Avro binary format (configured at the connect worker level), this consumer will display unreadable byte data instead of decoding the Avro messages.
-To stops and removes containers and networks:
+Since our data is stored in Avro binary format, this consumer will display unreadable byte data instead of decoding the Avro messages.
+Now, stop and remove containers, and networks for the next section:
 
 ```
-docker compose -f docker-compose-mysql-avro-worker.yaml
+docker compose -f docker-compose-mysql-avro-worker.yaml down
 ```
 
+you can also check the logs of the Kafka Connect container with either:
 
+```
+docker logs debezium-practical-examples-connect-1 | head -n 50
+```
+
+or 
+
+```
+docker logs debezium-practical-example-connect-1 | head -n 50 | grep -i converter
+```
 
 
 #### Debezium Connector configuration ####
