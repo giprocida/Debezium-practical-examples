@@ -798,34 +798,33 @@ curl -i -X DELETE -H "Accept:application/json" localhost:8083/connectors/invento
 
 
 
-#####
-10. check status, pause, and resume the connector worker
+### Managing Connectors
+To check the status, pause, and resume connectors using curl:
 
-http :8083/connectors/inventory-connector/status -b   
+To chec the status of the `inventory-connector`:
+
+```
 curl -H "Accept:application/json" localhost:8083/connectors/inventory-connector/status | jq
+```
 
+To pause the `inventory-connector` connector:
 
-http PUT :8083/connectors/inventory-connector/pause -b
+```
 curl -i -X PUT -H "Accept:application/json" localhost:8083/connectors/inventory-connector/pause
+```
 
+To resume the `inventory-connector` connector:
 
-http PUT :8083/connectors/technologists/resume -b
+```
 curl -i -X PUT -H "Accept:application/json" localhost:8083/connectors/inventory-connector/resume
+```
 
 
-11. delete the running connector
+To delete the `inventory-connector` connector:
 
-http DELETE :8083/connectors/technologists -b
 curl -i -X DELETE -H "Accept:application/json" localhost:8083/connectors/inventory-connector 
 
 
-#####
 
 
-
-
-The kafka-console-consumer is a generic consumer script that can consume messages from Kafka topics and print them to the console. It does not handle any specific serialization format out of the box and relies on the user to specify the appropriate deserializers if needed.
- The script will not properly decode Avro messages and will display unreadable byte data.
-
-he kafka-avro-console-consumer is a specialized version of the console consumer provided by Confluent. It is designed to work with Avro-encoded messages and integrates with the Confluent Schema Registry to automatically handle Avro serialization and deserialization.
 
