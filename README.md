@@ -354,7 +354,7 @@ docker compose -f docker-compose-mysql-avro-worker.yaml
 
 In this example, we will set up two pipelines:
 
-* A pipeline where data is serialized in Avro format for efficient storage and schema evolution.
+* A pipeline where data is serialized in Avro format.
 * A pipeline where data is serialized in JSON or String format.
 
 
@@ -370,12 +370,14 @@ Key Points:
 
 * No Explicit Avro Serializer: The configuration does not explicitly set any Avro Serializer.
 * Topics Creation: For each table listed in the `table.include.list` parameter, the connector will create corresponding topics using the specified `topic.prefix`. In this case, the following topics will be created:
+
   * dbmytest1.inventory.geom
   * dbmytest1.inventory.orders
   * dbserver1.inventory.orders
 
 
-Setting Up the Avro Connector
+**Setting Up the Avro Connector**
+
 Next, let's create our second connector, which will handle data serialized in Avro format:
 
 ```
@@ -386,6 +388,7 @@ Key Points:
 
 * Explicit Avro Serializer: The configuration explicitly sets the Avro Serializer.
 * Topics Creation: For each table listed in the table.include.list parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In this case, the following topics will be created:
+
   * dbserver.inventory.customers
   * dbserver.inventory.addresses
 
@@ -396,24 +399,29 @@ For the non-Avro connector:
 
 ```
 curl -X GET localhost:8083/connectors/nonavro-connector/config | jq
+```
+
 For the Avro connector:
 
-sh
-Copy code
+```
 curl -X GET localhost:8083/connectors/inventory-connector/config | jq
-Listing All Created Topics
+```
+
 To list all the topics created on the Kafka broker upon creation of each connector, run the following command:
 
-sh
-Copy code
+```
 docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
     --bootstrap-server kafka:9092 \
     --list
+```
 
 
+*Note*: This command lists all the topics in the Kafka broker, including those created by each connector using their respective naming conventions. 
 
+For example:
 
-
+* Topics created by the non-Avro connector may include dbmytest1.inventory.geom, dbmytest1.inventory.orders, and dbserver1.inventory.orders.
+* Topics created by the Avro connector may include dbserver.inventory.customers and dbserver.inventory.addresses.
 
 
 
