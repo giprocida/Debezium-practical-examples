@@ -344,15 +344,162 @@ docker compose -f docker-compose-mysql-avro-worker.yaml
 #### Debezium Connector configuration ####
 
 
+ We will use the following files:
+
+* docker-compose-mysql-avro-connector.yaml
+* register-mysql-avro.json
+* register-mysql-nonavro.json
+
+
+
+In this example, we will set up two pipelines:
+
+* A pipeline where data is serialized in Avro format for efficient storage and schema evolution.
+* A pipeline where data is serialized in JSON or String format.
+
+
+**Setting Up the Non-Avro Connector** 
+
+Let's create our first connector, which will handle data that is not in Avro format:
+
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-nonavro.json
+```
+
+Key Points:
+
+* No Explicit Avro Serializer: The configuration does not explicitly set any Avro Serializer.
+* Topics Creation: For each table listed in the `table.include.list` parameter, the connector will create corresponding topics using the specified `topic.prefix`. In this case, the following topics will be created:
+  * dbmytest1.inventory.geom
+  * dbmytest1.inventory.orders
+  * dbserver1.inventory.orders
+
+
+Setting Up the Avro Connector
+Next, let's create our second connector, which will handle data serialized in Avro format:
+
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-avro.json
+```
+
+Key Points:
+
+* Explicit Avro Serializer: The configuration explicitly sets the Avro Serializer.
+* Topics Creation: For each table listed in the table.include.list parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In this case, the following topics will be created:
+  * dbserver.inventory.customers
+  * dbserver.inventory.addresses
+
+
+To review the configuration for each connector, use the following commands:
+
+For the non-Avro connector:
+
+```
+curl -X GET localhost:8083/connectors/nonavro-connector/config | jq
+For the Avro connector:
+
+sh
+Copy code
+curl -X GET localhost:8083/connectors/inventory-connector/config | jq
+Listing All Created Topics
+To list all the topics created on the Kafka broker upon creation of each connector, run the following command:
+
+sh
+Copy code
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
+    --bootstrap-server kafka:9092 \
+    --list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Configuring Avro at the Debezium Connector involves specifying the converter and schema registry as a part of the connectors configuration. File to be used: 
 
 * docker-compose-mysql-avro-connector.yaml 
 * register-mysql-avro.json configuration files. 
 * register-mysql-nonavro.json ( for testing purposes)
 
-The Compose file configures the Connect service to use the default (de-)serializers for the Connect instance. The connector configuration file configures the connector but explicitly sets the (de-)serializers for the connector to use Avro and specifies the location of the schema registry.
+The Compose file configures the Connect service to use the default (de-)serializers for the Connect instance. The connector configuration file configures the connector but explicitly sets the (de-)serializers for the connector to use Avro and specifies the location of the schema registry. 
+Setting up the serializer at the connector level in Kafka Connect provides flexibility in how data is serialized and deserialized. In our example we weill have one pipeline for a set of topics/tables where data is serialized in Avro format for efficient storage and schema evolution, and another pipeline where data is serialized in JSON or String. Let's create our first connector that will deal with data which are not in avro format:
 
-Run the following commands to start the services:
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-nonavro.json
+```
+
+
+What is important to highlight here are two things:
+
+1. We don t set explicity any Avro Serializer
+
+2. For each table listed in `table.include.list` parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In our case three topics will be created:
+
+
+* dbmytest1.inventory.geom
+* dbmytest1.inventory.orders
+* dbserver1.inventory.orders
+
+
+Let's create our second connector that will deal with data which will deal with data in avro format:
+
+
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql-avro.json
+```
+
+
+
+What is important to highlight here are two things:
+
+1. We do set explicity any Avro Serializer
+
+2. For each table listed in `table.include.list` parameter, the connector will create corresponding Kafka topics using the specified topic.prefix. In our case three topics will be created:
+
+
+* dbserver.inventory.customers
+* dbserver.inventory.addresses
+
+
+
+Let's review the configuration for each connector once more time:
+
+
+```
+curl -X GET localhost:8083/connectors/inventory-connector/config | jq
+```
+
+```
+curl -X GET localhost:8083/connectors/nonavro-connector/config | jq
+```
+
+
+
+To list all the topics that we created on the Kafka broker upon creation of each connector, run the following command:
+
+
+```
+ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
+    --bootstrap-server kafka:9092 \
+    --list
+```
+
+
+
+
+
+
+<!-- Run the following commands to start the services:
 
 ```
 export DEBEZIUM_VERSION=2.0.1.Final
@@ -442,6 +589,11 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
 
 This consumer will display unreadable byte data instead of decoding the Avro messages as we expected.
 
+
+
+
+
+ -->
 
 
 
