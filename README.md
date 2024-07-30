@@ -318,13 +318,7 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
 The kafka-console-consumer is a generic consumer script that does not handle any specific serialization format out of the box.
 
 Since our data is stored in Avro binary format, this consumer will display unreadable byte data instead of decoding the Avro messages.
-Now, stop and remove containers, and networks for the next section:
-
-```
-docker compose -f docker-compose-mysql-avro-worker.yaml down
-```
-
-you can also check the logs of the Kafka Connect container with either:
+You can also check the logs of the Kafka Connect container to make sure that for both KEY_CONVERTER and VALUE_CONVERTER the avro converter was set properly.
 
 ```
 docker logs debezium-practical-examples-connect-1 | head -n 50
@@ -335,6 +329,14 @@ or
 ```
 docker logs debezium-practical-example-connect-1 | head -n 50 | grep -i converter
 ```
+
+Now, stop and remove containers, and networks for the next section:
+
+```
+docker compose -f docker-compose-mysql-avro-worker.yaml down
+```
+
+
 
 
 #### Debezium Connector configuration ####
