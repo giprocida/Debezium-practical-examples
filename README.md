@@ -360,7 +360,7 @@ Key Points:
 
   * dbmytest1.inventory.geom
   * dbmytest1.inventory.orders
-  * dbserver1.inventory.orders
+
 
 
 **Setting Up the Avro Connector**
