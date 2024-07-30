@@ -679,12 +679,18 @@ If you alter the structure of the `orders` table in the database and trigger ano
 
 1. Log into the MySQL container (use VSCode for that).
 
-2. mysql -u root -p
+2. Log into the MySQL RDBMS:
+
+```
+mysql -u root -p
+```
 
 Switch to the inventory database
 
-3. use inventory;
-
+3. 
+```
+use inventory;
+```
 Alter the `customers` table structure: For example, add a new column:
 
 4. ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
