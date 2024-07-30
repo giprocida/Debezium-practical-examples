@@ -685,20 +685,23 @@ If you alter the structure of the `orders` table in the database and trigger ano
 mysql -u root -p
 ```
 
-Switch to the inventory database
 
-3. 
+3. Switch to the `inventory` database 
+
 ```
 use inventory;
 ```
-Alter the `customers` table structure: For example, add a new column:
+4. Alter the `customers` table structure: For example, add a new column:
 
-4. ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+```
+ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+```
 
- Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+5. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
 
-5. INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
-
+```
+INSERT INTO customers (id, first_name, last_name, email, phone) VALUES (1050, 'John', 'Doe', 'john.doe@acme.com', '123-456-7890');
+```
 
 
 
