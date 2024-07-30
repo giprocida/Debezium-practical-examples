@@ -483,15 +483,10 @@ mysql -u root -p
 use inventory;
 ```
 
-4. Alter the `geom` table structure: For example, add a new column:
+4. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
 
 ```
-ALTER TABLE geom ADD COLUMN mytext VARCHAR(20);
-```
-5. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
-
-```
-INSERT INTO geom (id, g, h, size) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL,'Hello')
+INSERT INTO geom (id, g, h, size) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL)
 ```
 
 You should see a new message indicating that a change in the geom table was detected.
