@@ -489,7 +489,7 @@ use inventory;
 INSERT INTO geom (id, g, h ) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL)
 ```
 
-You should see a new message indicating that a change in the geom table was detected.
+You should see a new message indicating that a change in the `geom` table was detected.
 
 
 
@@ -498,7 +498,29 @@ You should see a new message indicating that a change in the geom table was dete
 **note**: If you consume messages from the topic `dbmytest1.inventory.geom` using the kafka-avro-console-consumer you will still encounter problem with deserializing. This because the consumer expects Avro-serialized data but is receiving data in different format;
 
 
+### Using MySQL and Apicurio Registry ###
 
+
+
+ We will use the following files:
+
+* docker-compose-mysql-avro-connector.yaml
+* register-mysql-apicurio-convert-avro.json
+* register-mysql-apicurio-convert-json.json
+
+
+
+In this example, we will set up two pipelines:
+
+* A pipeline where data is serialized in Avro format.
+* A pipeline where data is serialized in JSON.
+
+Run the following commands to start the services:
+
+```
+export DEBEZIUM_VERSION=2.0.1.Final
+docker compose -f docker-compose-mysql-apicurio.yaml up
+```
 
 
 
