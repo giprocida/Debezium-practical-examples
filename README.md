@@ -524,7 +524,9 @@ docker compose -f docker-compose-mysql-apicurio.yaml up
 
 
 
-
+```
+kafkacat -b kafka:9092 -t dbserver1.inventory.customers -s avro -r http://apicurio:8080/apis/ccompat/v6/subjects -e | jq
+```
 
 
 
