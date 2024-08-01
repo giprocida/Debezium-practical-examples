@@ -486,7 +486,7 @@ use inventory;
 4. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
 
 ```
-INSERT INTO geom (id, g, h ) VALUES (4, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL)
+INSERT INTO geom (id, g, h ) VALUES (40, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL);
 ```
 
 You should see a new message indicating that a change in the `geom` table was detected.
