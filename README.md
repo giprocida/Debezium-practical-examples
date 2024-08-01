@@ -546,10 +546,9 @@ curl -X GET localhost:8083/connectors/avro-connector/config | jq
 
 To list all artifacts in the default group of the Apicurio Registry and verify if any schema is registered, use the following command:
 
-
-
+```
 curl -X GET http://localhost:8080/apis/registry/v2/groups/default/artifacts/ |  jq  
-
+```
 
 
 To list all the topics created on the Kafka broker upon creation of each connector, run the following command:
@@ -572,6 +571,7 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
     --topic dbserver-avro.inventory.customers
 ```
 
+Since our data is stored in Avro binary format, this consumer will display unreadable byte data instead of decoding the Avro messages.
 
 To consume the Avro messages It is possible to use kafkacat tool (not working though)
 
