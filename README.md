@@ -573,22 +573,23 @@ docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consume
 
 Since our data is stored in Avro binary format, this consumer will display unreadable byte data instead of decoding the Avro messages.
 
-To consume the Avro messages It is possible to use kafkacat tool (not working though)
+To consume the Avro messages it is possible to use kafkacat tool (not working though)
 
 ```
-kafkacat -b kafka:9092 -t dbserver-avro.inventory.customers -s avro -r http://apicurio:8080/apis/ccompat/v6/subjects -e | jq
+docker exec -it cli-tools \
+kafkacat -b kafka:9092 \
+-t dbserver-avro.inventory.customers \
+-s avro -r http://apicurio:8080/apis/ccompat/v6/subjects -e 
 ```
-
 
 
 Now, let's create a consumer from the Kafka container to consume data from a the topic `dbserver-json.inventory.geom` where data is serialized in json:
 
 ```
-docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --topic dbserver-json.inventory.geom
+docker exec -it cli-tools \
+kafkacat -b kafka:9092 \
+    -t dbserver-json.inventory.geom \
+    -o beginning
 ```
 
 
@@ -604,10 +605,42 @@ where 13 is the global ID obtained from the Kafka consumer output.
 
 
 
+If you alter the structure of the `geom` table in the database and trigger another change event, a new version of that schema will be available in the schema registry. Follow these steps to achieve this:
+
+1. Log into the MySQL container (use VSCode for that).
+
+2. Log into the MySQL RDBMS:
+
+```
+mysql -u root -p
+```
+
+3. Switch to the inventory database
+
+```
+use inventory;
+```
+
+4. Alter the `geom` table structure: For example, add a new column:
+
+```
+ALTER TABLE geom ADD COLUMN phone VARCHAR(20);
+```
+
+5. Trigger a change event by updating the table: Insert a new row to reflect the schema change;
+
+```
+INSERT INTO geom (id, g, h, phone) VALUES (40, ST_GeomFromText('POINT(40.748817 -73.985428)'), NULL,'123-456');
+```
+
+Now, if you look at your consumer, you will notice that a new line appeared because a new schema version (with globalId=14) was used for the newly added row, which is necessary to accommodate the structural changes in the table.
 
 
+You can access the version of the schema for geom values:
 
-
+```
+curl -X GET http://localhost:8080/apis/registry/v2/ids/globalIds/14 | jq  
+```
 
 
 
