@@ -166,7 +166,7 @@ docker compose -f docker-compose-mysql-avro-worker.yaml up
 **note**: You're going to notice five services up and running: one for the MySQL database, one for ZooKeeper, one for the Schema Registry, one for the Kafka broker, and one for Kafka Connect.
 
 
-To check the status of the Apicurio Registry, use the following command:
+To check the status of the Confluent Schema Registry, use the following command:
 
 ```
 curl -i -H "Accept:application/json" localhost:8081
@@ -174,7 +174,7 @@ curl -i -H "Accept:application/json" localhost:8081
 
 A successful response will return a status code of 200 OK .
 
-To list all schemas registered in the `Confluent Schema Registry`, use the following command:
+To list all schemas registered in the Schema Registry, use the following command:
 
 ```
 curl -H "Accept:application/json" localhost:8081/subjects | jq
