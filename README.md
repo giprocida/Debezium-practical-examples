@@ -522,11 +522,84 @@ export DEBEZIUM_VERSION=2.0.1.Final
 docker compose -f docker-compose-mysql-apicurio.yaml up
 ```
 
-
+Run the scripts `run-apicurio-connectors.sh` to speed things up:
 
 ```
-kafkacat -b kafka:9092 -t dbserver1.inventory.customers -s avro -r http://apicurio:8080/apis/ccompat/v6/subjects -e | jq
+bash run-apicurio-connectors.sh
 ```
+
+
+To review the configuration for each connector, use the following commands:
+
+For the json connector:
+
+```
+curl -X GET localhost:8083/connectors/json-connector/config | jq
+```
+
+For the Avro connector:
+
+```
+curl -X GET localhost:8083/connectors/avro-connector/config | jq
+```
+
+
+To list all artifacts in the default group of the Apicurio Registry and verify if any schema is registered, use the following command:
+
+
+
+curl -X GET http://localhost:8080/apis/registry/v2/groups/default/artifacts/ |  jq  
+
+
+
+To list all the topics created on the Kafka broker upon creation of each connector, run the following command:
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-topics.sh \
+    --bootstrap-server kafka:9092 \
+    --list
+```
+
+
+
+Now, let's create a consumer from the Kafka container to consume data from a the topic `dbserver-avro.inventory.customers` where data is serialized in Avro format:
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbserver-avro.inventory.customers
+```
+
+
+To consume the Avro messages It is possible to use kafkacat tool (not working though)
+
+```
+kafkacat -b kafka:9092 -t dbserver-avro.inventory.customers -s avro -r http://apicurio:8080/apis/ccompat/v6/subjects -e | jq
+```
+
+
+
+Now, let's create a consumer from the Kafka container to consume data from a the topic `dbserver-json.inventory.geom` where data is serialized in json:
+
+```
+docker exec debezium-practical-examples-kafka-1 /kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --topic dbserver-json.inventory.geom
+```
+
+
+You can access the version of the schema for geom values:
+
+```
+curl -X GET http://localhost:8080/apis/registry/v2/ids/globalIds/13 | jq  
+```
+
+where 13 is the global ID obtained from the Kafka consumer output.
+
 
 
 
